@@ -1,6 +1,9 @@
 
 default:
-	gcc prosqlite.c -o prosqlite
+	g++ -Wall prosqlite.cpp -o prosqlite
 
 run:
 	./prosqlite
+
+clean:
+	rm ./prosqlite
