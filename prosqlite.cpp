@@ -4,8 +4,9 @@
 /**
  * do_meta_command - execute meta command
 */
-MetaCommandResult do_meta_command(InputBuffer* input_buffer) {
+MetaCommandResult do_meta_command(InputBuffer* input_buffer, Table* table) {
     if (strcmp(input_buffer->buffer, ".exit") == 0) {
+        db_close(table);
         exit(EXIT_SUCCESS);
     } else {
         return META_COMMAND_UNRECOGNIZED_COMMAND;
@@ -104,7 +105,14 @@ ExecuteResult execute_statement(Statement* statement, Table* table) {
 }
 
 int main(int argc, char* argv[]) {
-    Table* table = new_table();
+    if (argc < 2) {
+        printf("Error writing: %d\n", errno);
+        exit(EXIT_FAILURE);
+    }
+
+    char* filename = argv[1];
+    Table* table = db_open(filename);
+
     InputBuffer* input_buffer = new_input_buffer();
     while (true) {
         print_prompt();
@@ -113,7 +121,7 @@ int main(int argc, char* argv[]) {
         if (input_buffer->buffer_length == 0) continue;
 
         if (input_buffer->buffer[0] == '.') {
-            switch (do_meta_command(input_buffer)) {
+            switch (do_meta_command(input_buffer, table)) {
                 case (META_COMMAND_SUCCESS):
                     continue;
                 case (META_COMMAND_UNRECOGNIZED_COMMAND):
